@@ -61,6 +61,7 @@ router.post('/', async (request, env) => {
             }
           })
         }
+        
         if (message.data.name === 'hello') {
           return new JsonResponse({
             type: 4,
@@ -69,6 +70,7 @@ router.post('/', async (request, env) => {
             }
           })
         }
+
         if (message.data.name === 'joke') {
           const joke = await getRandomJoke();
           return new JsonResponse({

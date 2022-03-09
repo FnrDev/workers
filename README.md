@@ -1,10 +1,4 @@
-# awwbot
-
-> Bring the cuteness of r/aww straight to your discord server. Now on Cloudflare workers.
-
-![awwbot in action](https://user-images.githubusercontent.com/534619/157503404-a6c79d1b-f0d0-40c2-93cb-164f9df7c138.gif)
-
-
+# Discord Bot Using Cloudflare Workers
 ## How it works
 
 When you create a Bot on Discord, you can receive common events from the client as [webhooks](https://discord.com/developers/docs/resources/webhook). Discord will call a pre-configured HTTPS endpoint, and send details on the event in the JSON payload.
@@ -60,74 +54,51 @@ Let's start by cloing the respository, and installing dependencies.  This requir
 $ npm install
 ```
 
-Before testing our bot, we need to register our desired slash commands.  For this bot, we'll have a `/awwww` command, and a `/invite` command.  The name and description for these are kept separate in `commands.js`:
+Before testing our bot, we need to register our desired slash commands.  For this bot, we'll have a `/joke` command, and a `/hello` command, and a `/invite` command.  The name and description for these are kept separate in `commands.js`:
 
 ```js
-export const AWW_COMMAND = {
-  name: 'awwww',
-  description: 'Drop some cuteness on this channel.',
-};
-
-export const INVITE_COMMAND = {
-  name: 'invite',
-  description: 'Get an invite link to add the bot to your server',
-};
+module.exports = [
+  {
+    name: "invite",
+    description: "Get bot invite link"
+  },
+  {
+    name: "hello",
+    description: "Get hello world using HTTPS Request"
+  },
+  {
+    name: "joke",
+    description: "Get random joke."
+  }
+];
 ```
 
 The code to register our commands lives in `register.js`.  Commands can be registered globally, making them available for all servers with the bot installed, or they can be registered to a single server.  In this example - we're just going to focus on global commands:
 
 ```js
-import { AWW_COMMAND, INVITE_COMMAND } from './commands.js';
-import fetch from 'node-fetch';
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+require('colors');
+require('dotenv').config();
 
-/**
- * This file is meant to be run from the command line, and is not used by the
- * application server.  It's allowed to use node.js primitives, and only needs
- * to be run once.
- */
+// setup slash commands
 
-const token = process.env.DISCORD_TOKEN;
-const applicationId = process.env.DISCORD_APPLICATION_ID;
+const commands = require('./commands')
+const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
-if (!token) {
-  throw new Error('The DISCORD_TOKEN environment variable is required.');
-}
-if (!applicationId) {
-  throw new Error(
-    'The DISCORD_APPLICATION_ID environment variable is required.'
-  );
-}
-
-/**
- * Register all commands globally.  This can take o(minutes), so wait until
- * you're sure these are the commands you want.
- */
-async function registerGlobalCommands() {
-  const url = `https://discord.com/api/v10/applications/${applicationId}/commands`;
-  await registerCommands(url);
-}
-
-async function registerCommands(url) {
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bot ${token}`,
-    },
-    method: 'PUT',
-    body: JSON.stringify([AWW_COMMAND, INVITE_COMMAND]),
-  });
-
-  if (response.ok) {
-    console.log('Registered all commands');
-  } else {
-    console.error('Error registering commands');
-    const text = await response.text();
-    console.error(text);
-  }
-  return response;
-}
-
-await registerGlobalCommands();
+(async () => {
+	try {
+		console.log('[Discord API] Started refreshing application (/) commands.'.yellow);
+		await rest.put(
+			process.env.DEVELOPMENT ? Routes.applicationGuildCommands(process.env.DISCORD_APPLICATION_ID, process.env.DISCORD_TEST_GUILD_ID)
+      : Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID),
+			{ body: commands },
+		);
+		console.log('[Discord API] Successfully reloaded application (/) commands.'.green);
+	} catch (error) {
+		console.error(error);
+	}
+})();
 ```
 
 This command needs to be run locally, once before getting started:
@@ -196,11 +167,6 @@ export default {
 All of the API calls from Discord in this example will be POSTed to `/`. From here, we will use the [`discord-interactions`](https://github.com/discord/discord-interactions-js) npm module to help us interpret the event, and to send results.
 
 ```js
-/**
- * Main route for all requests sent from Discord.  All incoming messages will
- * include a JSON payload described here:
- * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
- */
 router.post('/', async (request, env) => {
   const message = await request.json();
   console.log(message);
@@ -215,39 +181,38 @@ router.post('/', async (request, env) => {
 
   if (message.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
-    switch (message.data.name.toLowerCase()) {
-      case AWW_COMMAND.name.toLowerCase(): {
-        console.log('handling cute request');
-        const cuteUrl = await getCuteUrl();
-        return new JsonResponse({
-          type: 4,
-          data: {
-            content: cuteUrl,
-          },
-        });
-      }
-      case INVITE_COMMAND.name.toLowerCase(): {
-        const applicationId = env.DISCORD_APPLICATION_ID;
-        const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
-        return new JsonResponse({
-          type: 4,
-          data: {
-            content: INVITE_URL,
-            flags: 64,
-          },
-        });
-      }
-      default:
+        if (message.data.name === 'invite') {
+          const botId = env.DISCORD_APPLICATION_ID;
+          return new JsonResponse({
+            type: 4,
+            data: {
+              content: `[Click to use bot 🥳](https://discord.com/oauth2/authorize?client_id=${botId}&scope=applications.commands)`,
+              flags: 64
+            }
+          })
+        }
+
+        if (message.data.name === 'hello') {
+          return new JsonResponse({
+            type: 4,
+            data: {
+              content: "👋 Hey i'm using HTTPS request for sending this message using interactions"
+            }
+          })
+        }
+
+        if (message.data.name === 'joke') {
+          const joke = await getRandomJoke();
+          return new JsonResponse({
+            type: 4,
+            data: {
+              content: joke
+            }
+          })
+        }
         console.error('Unknown Command');
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
     }
   }
-
-  console.error('Unknown Type');
-  return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
-});
+);
 ```
-
-## Questions?
-
-Feel free to post an issue here, or reach out to [@justinbeckwith](https://twitter.com/JustinBeckwith)!
