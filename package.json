@@ -14,6 +14,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "discord-api-types": "^0.28.0",
     "discord-interactions": "^3.0.0",
     "dotenv": "^10.0.0",
     "itty-router": "^2.5.1"
