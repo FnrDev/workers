@@ -8,8 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, INVITE_COMMAND, HELLO_WORLD_COMMAND, JOKE } from './commands.js';
-import { getCuteUrl } from './reddit.js';
+import { INVITE_COMMAND, HELLO_WORLD_COMMAND, JOKE } from './commands.js';
 import { getRandomJoke } from './joke.js';
 
 class JsonResponse extends Response {
@@ -52,54 +51,38 @@ router.post('/', async (request, env) => {
 
   if (message.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
-    switch (message.data.name.toLowerCase()) {
-      case AWW_COMMAND.name.toLowerCase(): {
-        console.log('handling cute request');
-        const cuteUrl = await getCuteUrl();
-        return new JsonResponse({
-          type: 4,
-          data: {
-            content: cuteUrl,
-          },
-        });
-      }
-      case INVITE_COMMAND.name.toLowerCase(): {
-        const applicationId = env.DISCORD_APPLICATION_ID;
-        const INVITE_URL = `[Click here to invite the bot](https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands)`;
-        return new JsonResponse({
-          type: 4,
-          data: {
-            content: INVITE_URL,
-            flags: 64,
-          },
-        });
-      }
-      case HELLO_WORLD_COMMAND.name.toLowerCase(): {
-        return new JsonResponse({
-          type: 4,
-          data: {
-            content: "👋 Hey i'm using HTTPS request for sending this message using interactions"
-          }
-        })
-      }
-      case JOKE.name.toLowerCase(): {
-        const joke = await getRandomJoke();
-        return new JsonResponse({
-          type: 4,
-          data: {
-            content: joke
-          }
-        })
-      }
-      default:
+        if (message.data.name === 'invite') {
+          const botId = env.DISCORD_APPLICATION_ID;
+          return new JsonResponse({
+            type: 4,
+            data: {
+              content: `[Click to use bot 🥳](https://discord.com/oauth2/authorize?client_id=${botId}&scope=applications.commands)`,
+              flags: 64
+            }
+          })
+        }
+        if (message.data.name === 'hello') {
+          return new JsonResponse({
+            type: 4,
+            data: {
+              content: "👋 Hey i'm using HTTPS request for sending this message using interactions"
+            }
+          })
+        }
+        if (message.data.name === 'joke') {
+          const joke = await getRandomJoke();
+          return new JsonResponse({
+            type: 4,
+            data: {
+              content: joke
+            }
+          })
+        }
         console.error('Unknown Command');
         return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
     }
   }
-
-  console.error('Unknown Type');
-  return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
-});
+);
 router.all('*', () => new Response('Not Found.', { status: 404 }));
 
 export default {
