@@ -8,10 +8,6 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "wrangler dev src/server.js",
-    "ngrok": "ngrok http 8787",
-    "test": "c8 mocha test",
-    "fix": "eslint --fix '**/*.js'",
-    "lint": "eslint '**/*.js'",
     "slash": "node src/register.js",
     "publish": "wrangler publish"
   },
