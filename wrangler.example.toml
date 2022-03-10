@@ -1,0 +1,21 @@
+name = "worker"
+main = "./src/server.js"
+type = "javascript"
+compatibility_date="2022-02-26"
+
+account_id = ""
+workers_dev = true
+
+[[rules]]
+type = "ESModule"
+globs = [ "**/*.js" ]
+
+[env.dev]
+
+[env.production]
+
+# [secrets]
+# DISCORD_TOKEN
+# DISCORD_PUBLIC_KEY
+# DISCORD_APPLICATION_ID
+# DISCORD_TEST_GUILD_ID
