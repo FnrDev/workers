@@ -1,7 +1,7 @@
 {
-  "name": "awwbot",
+  "name": "workers",
   "version": "1.0.0",
-  "description": "A simple discord bot that uses intents to post pictures from r/aww",
+  "description": "Simple discord bot template using cloudflare workers",
   "type": "commonjs",
   "private": true,
   "main": "src/server.js",
@@ -25,7 +25,6 @@
   "devDependencies": {
     "ngrok": "^4.3.0",
     "node-fetch": "^3.2.2",
-    "prettier": "^2.5.1",
     "wrangler": "^0.0.18"
   }
 }

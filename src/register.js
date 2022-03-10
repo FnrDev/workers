@@ -3,8 +3,6 @@ const { Routes } = require('discord-api-types/v9');
 require('colors');
 require('dotenv').config();
 
-// setup slash commands
-
 const commands = require('./commands')
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 

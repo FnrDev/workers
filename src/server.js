@@ -1,7 +1,3 @@
-/**
- * The core server that runs on a Cloudflare worker.
- */
-
 import { Router } from 'itty-router';
 import { getRandomJoke } from './joke.js';
 import { verifyKey } from 'discord-interactions';
