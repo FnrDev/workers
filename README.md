@@ -7,7 +7,6 @@ This bot is an example of writing a webhook based bot which:
 
 - Uses the [Discord Interactions API](https://discord.com/developers/docs/interactions/receiving-and-responding)
 - Uses [Cloudflare Workers](https://workers.cloudflare.com/) for hosting
-- Uses the [Reddit API](https://www.reddit.com/dev/api/) to send messages back to the user
 
 ## Creating bot on Discord
 
