@@ -3,15 +3,15 @@
  */
 
 import { Router } from 'itty-router';
-import {
-  InteractionResponseType,
-  InteractionType,
-  verifyKey,
-} from 'discord-interactions';
-import { INVITE_COMMAND, HELLO_WORLD_COMMAND, JOKE } from './commands.js';
 import { getRandomJoke } from './joke.js';
+import { verifyKey } from 'discord-interactions';
+import {
+  InteractionType,
+  InteractionResponseType,
+  MessageFlags
+} from "discord-api-types/v9";
 
-class JsonResponse extends Response {
+class respond extends Response {
   constructor(body, init) {
     const jsonBody = JSON.stringify(body);
     init = init || {
@@ -38,50 +38,57 @@ router.get('/', (request, env) => {
  * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
 router.post('/', async (request, env) => {
-  const message = await request.json();
-  console.log(message);
-  if (message.type === InteractionType.PING) {
-    // The `PING` message is used during the initial webhook handshake, and is
-    // required to configure the webhook in the developer portal.
+  const interaction = await request.json();
+  console.log(interaction);
+  if (interaction.type === InteractionType.Ping) {
     console.log('Handling Ping request');
-    return new JsonResponse({
-      type: InteractionResponseType.PONG,
+    return new respond({
+      type: InteractionResponseType.Pong,
     });
   }
 
-  if (message.type === InteractionType.APPLICATION_COMMAND) {
-    // Most user commands will come as `APPLICATION_COMMAND`.
-        if (message.data.name === 'invite') {
+  if (interaction.type === InteractionType.ApplicationCommand) {
+        if (interaction.data.name === 'invite') {
           const botId = env.DISCORD_APPLICATION_ID;
-          return new JsonResponse({
-            type: 4,
+          return new respond({
+            type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: `[Click to use bot 🥳](https://discord.com/oauth2/authorize?client_id=${botId}&scope=applications.commands)`,
-              flags: 64
+              flags: MessageFlags.Ephemeral
             }
           })
         }
         
-        if (message.data.name === 'hello') {
-          return new JsonResponse({
-            type: 4,
+        if (interaction.data.name === 'hello') {
+          return new respond({
+            type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: "👋 Hey i'm using HTTPS request for sending this message using interactions"
             }
           })
         }
 
-        if (message.data.name === 'joke') {
+        if (interaction.data.name === 'joke') {
           const joke = await getRandomJoke();
-          return new JsonResponse({
-            type: 4,
+          return new respond({
+            type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: joke
             }
           })
         }
+
+        if (interaction.data.name === 'help') {
+          return new respond({
+            type: InteractionResponseType.ChannelMessageWithSource,
+            data: {
+              content: "👋 Here is list of all commands.\n`invite` - Get bot invite link\n`hello` - Get hello message\n`joke` - Get random joke."
+            }
+          })
+        }
+
         console.error('Unknown Command');
-        return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
+        return new respond({ error: 'Unknown Type' }, { status: 400 });
     }
   }
 );
