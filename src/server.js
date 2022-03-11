@@ -87,7 +87,7 @@ router.post('/', async (request, env) => {
           })
         }
 
-        if (interaction.data.name === 'youtube') {
+        if (interaction.data.name === 'activity') {
           if (!interaction.data.resolved?.channels) {
             return new respond({
               type: InteractionResponseType.ChannelMessageWithSource,
@@ -97,13 +97,13 @@ router.post('/', async (request, env) => {
               }
             })
           }
-          const postChannel = await fetch(`${RouteBases.api}${Routes.channelInvites(interaction.data.options[0].value)}`, {
+          const postChannel = await fetch(`${RouteBases.api}${Routes.channelInvites(interaction.data.options[1].value)}`, {
             method: "POST",
             headers: { authorization: `Bot ${env.DISCORD_TOKEN}`, 'content-type': 'application/json' },
             body: JSON.stringify({
               max_age: 0,
               target_type: InviteTargetType.EmbeddedApplication,
-              target_application_id: "880218394199220334"
+              target_application_id: interaction.data.options[0].value
             })
           })
           const invite = await postChannel.json();
