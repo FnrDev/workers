@@ -4,7 +4,11 @@ import { verifyKey } from 'discord-interactions';
 import {
   InteractionType,
   InteractionResponseType,
-  MessageFlags
+  MessageFlags,
+  ChannelType,
+  InviteTargetType,
+  RouteBases,
+  Routes
 } from "discord-api-types/v9";
 
 class respond extends Response {
@@ -79,6 +83,43 @@ router.post('/', async (request, env) => {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: "👋 Here is list of all commands.\n`invite` - Get bot invite link\n`hello` - Get hello message\n`joke` - Get random joke."
+            }
+          })
+        }
+
+        if (interaction.data.name === 'youtube') {
+          if (!interaction.data.resolved?.channels) {
+            return new respond({
+              type: InteractionResponseType.ChannelMessageWithSource,
+              data: {
+                content: 'Please update your discord app to use this command',
+                flags: MessageFlags.Ephemeral
+              }
+            })
+          }
+          const postChannel = await fetch(`${RouteBases.api}${Routes.channelInvites(interaction.data.options[0].value)}`, {
+            method: "POST",
+            headers: { authorization: `Bot ${env.DISCORD_TOKEN}`, 'content-type': 'application/json' },
+            body: JSON.stringify({
+              max_age: 0,
+              target_type: InviteTargetType.EmbeddedApplication,
+              target_application_id: "880218394199220334"
+            })
+          })
+          const invite = await postChannel.json();
+          if (postChannel.status !== 200) {
+            return new respond({
+              type: InteractionResponseType.ChannelMessageWithSource,
+              data: {
+                content: `Error: ${invite.message}\nMake sure i have the "Create invite" permission in the voice channel`,
+                flags: MessageFlags.Ephemeral
+              }
+            })
+          }
+          return new respond({
+            type: InteractionResponseType.ChannelMessageWithSource,
+            data: {
+              content: `[Click to open](<https://discord.gg/${invite.code}>)`
             }
           })
         }
