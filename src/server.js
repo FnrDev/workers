@@ -5,7 +5,6 @@ import {
   InteractionType,
   InteractionResponseType,
   MessageFlags,
-  ChannelType,
   InviteTargetType,
   RouteBases,
   Routes
@@ -123,12 +122,13 @@ router.post('/', async (request, env) => {
             }
           })
         }
-
+        // no command response
         console.error('Unknown Command');
         return new respond({ error: 'Unknown Type' }, { status: 400 });
     }
   }
 );
+// Return "not found" response for all pages exept "/" route
 router.all('*', () => new Response('Not Found.', { status: 404 }));
 
 export default {
