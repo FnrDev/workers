@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     name: "invite",
     description: "Get bot invite link"
