@@ -15,16 +15,16 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@discordjs/rest": "^0.3.0",
+    "@discordjs/rest": "^0.5.0",
     "colors": "^1.4.0",
-    "discord-api-types": "^0.28.0",
-    "discord-interactions": "^3.0.0",
+    "discord-api-types": "^0.34.0",
+    "discord-interactions": "^3.2.0",
     "dotenv": "^10.0.0",
     "itty-router": "^2.5.1"
   },
   "devDependencies": {
-    "ngrok": "^4.3.0",
-    "node-fetch": "^3.2.2",
+    "ngrok": "^4.3.1",
+    "node-fetch": "^3.2.6",
     "wrangler": "^0.0.18"
   }
 }
