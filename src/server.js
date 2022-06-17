@@ -9,7 +9,8 @@ import {
   RouteBases,
   Routes
 } from 'discord-api-types/v10';
-import { respond } from '../utils/respond'
+import { respond } from '../utils/respond';
+import commands from './commands';
 
 const router = Router();
 
@@ -67,10 +68,15 @@ router.post('/', async (request, env) => {
         }
 
         if (interaction.data.name === 'help') {
+          const commandsSort = [];
+          commands.map((command, index) => {
+            commandsSort.push(`\`${index + 1}\` - ${command.name} - ${command.description}`)
+          })
+
           return respond({
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
-              content: "👋 Here is list of all commands.\n`invite` - Get bot invite link\n`hello` - Get hello message\n`joke` - Get random joke."
+              content: `👋 Here is list of all commands.\n${commandsSort.join("\n")}`
             }
           })
         }
