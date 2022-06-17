@@ -1,5 +1,5 @@
 import { Router } from 'itty-router';
-import { getRandomJoke } from './joke.js';
+import { getRandomJoke } from '../utils/joke.js';
 import { verifyKey } from 'discord-interactions';
 import {
   InteractionType,
