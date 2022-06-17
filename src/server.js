@@ -8,19 +8,8 @@ import {
   InviteTargetType,
   RouteBases,
   Routes
-} from "discord-api-types/v10";
-
-class respond extends Response {
-  constructor(body, init) {
-    const jsonBody = JSON.stringify(body);
-    init = init || {
-      headers: {
-        'content-type': 'application/json;charset=UTF-8',
-      },
-    };
-    super(jsonBody, init);
-  }
-}
+} from 'discord-api-types/v10';
+import { respond } from '../utils/respond'
 
 const router = Router();
 
@@ -41,7 +30,7 @@ router.post('/', async (request, env) => {
   console.log(interaction);
   if (interaction.type === InteractionType.Ping) {
     console.log('Handling Ping request');
-    return new respond({
+    return respond({
       type: InteractionResponseType.Pong,
     });
   }
@@ -49,7 +38,7 @@ router.post('/', async (request, env) => {
   if (interaction.type === InteractionType.ApplicationCommand) {
         if (interaction.data.name === 'invite') {
           const botId = env.DISCORD_APPLICATION_ID;
-          return new respond({
+          return respond({
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: `[Click to use bot 🥳](https://discord.com/oauth2/authorize?client_id=${botId}&scope=applications.commands)`,
@@ -59,7 +48,7 @@ router.post('/', async (request, env) => {
         }
         
         if (interaction.data.name === 'hello') {
-          return new respond({
+          return respond({
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: "👋 Hey i'm using HTTPS request for sending this message using interactions"
@@ -69,7 +58,7 @@ router.post('/', async (request, env) => {
 
         if (interaction.data.name === 'joke') {
           const joke = await getRandomJoke();
-          return new respond({
+          return respond({
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: joke
@@ -78,7 +67,7 @@ router.post('/', async (request, env) => {
         }
 
         if (interaction.data.name === 'help') {
-          return new respond({
+          return respond({
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: "👋 Here is list of all commands.\n`invite` - Get bot invite link\n`hello` - Get hello message\n`joke` - Get random joke."
@@ -88,7 +77,7 @@ router.post('/', async (request, env) => {
 
         if (interaction.data.name === 'activity') {
           if (!interaction.data.resolved?.channels) {
-            return new respond({
+            return respond({
               type: InteractionResponseType.ChannelMessageWithSource,
               data: {
                 content: 'Please update your discord app to use this command',
@@ -107,7 +96,7 @@ router.post('/', async (request, env) => {
           })
           const invite = await postChannel.json();
           if (postChannel.status !== 200) {
-            return new respond({
+            return respond({
               type: InteractionResponseType.ChannelMessageWithSource,
               data: {
                 content: `Error: ${invite.message}\nMake sure i have the "Create invite" permission in the voice channel`,
@@ -115,7 +104,7 @@ router.post('/', async (request, env) => {
               }
             })
           }
-          return new respond({
+          return respond({
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
               content: `[Click to open](<https://discord.gg/${invite.code}>)`
@@ -124,7 +113,7 @@ router.post('/', async (request, env) => {
         }
         // no command response
         console.error('Unknown Command');
-        return new respond({ error: 'Unknown Type' }, { status: 400 });
+        return respond({ error: 'Unknown Type' }, { status: 400 });
     }
   }
 );
