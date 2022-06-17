@@ -8,7 +8,7 @@ import {
   InviteTargetType,
   RouteBases,
   Routes
-} from "discord-api-types/v9";
+} from "discord-api-types/v10";
 
 class respond extends Response {
   constructor(body, init) {
